@@ -55,8 +55,10 @@ public class HelloWorldSpeechlet implements Speechlet {
 		Intent intent = request.getIntent();
 		String intentName = (intent != null) ? intent.getName() : null;
 
-		if ("HelloWorldIntent".equals(intentName)) {
-			return getHelloResponse();
+		if ("StartEngagementIntent".equals(intentName)) {
+			return startSimpleEngagement();
+		} else if ("GetOperatorsIntent".equals(intentName)) {
+			return getOperatorsEngagement();
 		} else if ("AMAZON.HelpIntent".equals(intentName)) {
 			return getHelpResponse();
 		} else {
@@ -151,7 +153,7 @@ public class HelloWorldSpeechlet implements Speechlet {
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse getHelloResponse() {
+    private SpeechletResponse startSimpleEngagement() {
         doRequestToSaleMove();
 
 		String speechText = "Connecting you with salemove";
@@ -190,5 +192,22 @@ public class HelloWorldSpeechlet implements Speechlet {
 		reprompt.setOutputSpeech(speech);
 
 		return SpeechletResponse.newAskResponse(speech, reprompt, card);
+	}
+
+	public SpeechletResponse getOperatorsEngagement() {
+		doRequestToSaleMove();
+
+		String speechText = "Connecting you with salemove";
+
+		// Create the Simple card content.
+		SimpleCard card = new SimpleCard();
+		card.setTitle("HelloWorld");
+		card.setContent(speechText);
+
+		// Create the plain text output.
+		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+		speech.setText(speechText);
+
+		return SpeechletResponse.newTellResponse(speech, card);
 	}
 }
