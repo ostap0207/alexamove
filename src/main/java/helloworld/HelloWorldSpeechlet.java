@@ -103,7 +103,8 @@ public class HelloWorldSpeechlet implements Speechlet {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getHelloResponse() {
-        String speechText = "Hello thomas";
+
+        String speechText = "Connecting you with salemove";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
