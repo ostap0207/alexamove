@@ -10,6 +10,7 @@
 package helloworld;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.amazon.speech.slu.Intent;
@@ -110,8 +111,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 		return SpeechletResponse.newAskResponse(speech, reprompt, card);
 	}
 
-    public void doRequestToSaleMove() {
-        String url = "https://api.beta.salemove.com/engagement_requests";
+    public void doRequestToSaleMove(String operatorId) {
+        String url = BASE_URL + "/engagement_requests";
 
         Visitor visitor = new Visitor();
         visitor.setName("Ostap");
@@ -121,7 +122,7 @@ public class HelloWorldSpeechlet implements Speechlet {
         options.setPhoneNumber("+37258578461");
 
         SaleMoveRequest request = new SaleMoveRequest();
-        request.setOperatorId("739e44a5-a0b6-453b-98d1-e962c3784dfc");
+        request.setOperatorId(operatorId);
         request.setNewSiteVisitor(visitor);
         request.setMedia("phone");
         request.setMediaOptions(options);
@@ -158,15 +159,21 @@ public class HelloWorldSpeechlet implements Speechlet {
 		Map<String, Slot> slots = intent.getSlots();
 
 		Slot operatorSlot = slots.get(OPERATOR_SLOT);
+		String speechText = "";
 
 		if (operatorSlot != null) {
-			String operator = operatorSlot.getValue();
+			String operatorName = operatorSlot.getValue();
+			speechText = "Connecting you with " + operatorName;
 
+			List<Operator> operators = getSaleMoveOperators();
+			Optional<Operator> operator = operators.stream().filter(o -> operatorName.equalsIgnoreCase(o.getFirstName())).findFirst();
+
+			if(operator.isPresent()) {
+				doRequestToSaleMove(operator.get().getId());
+			} else {
+				speechText = "Operator was not found: " + operatorName;
+			}
 		}
-
-        doRequestToSaleMove();
-
-		String speechText = "Connecting you with salemove";
 
 		// Create the Simple card content.
 		SimpleCard card = new SimpleCard();
