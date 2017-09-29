@@ -105,7 +105,7 @@ public class HelloWorldSpeechlet implements Speechlet {
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 
-    private void doRequestToSalveMove() {
+    private void doRequestToSaleMove() {
         String url = "https://api.beta.salemove.com/engagement_requests";
 
         Visitor visitor = new Visitor();
@@ -161,6 +161,7 @@ public class HelloWorldSpeechlet implements Speechlet {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getHelloResponse() {
+        doRequestToSaleMove();
 
         String speechText = "Connecting you with salemove";
 
