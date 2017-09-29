@@ -9,6 +9,9 @@
  */
 package helloworld;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
@@ -16,12 +19,15 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 import model.MediaOptions;
+import model.Operator;
+import model.OperatorListResponse;
 import model.SaleMoveRequest;
 import model.Visitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,6 +38,8 @@ import java.util.Map;
  */
 public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
+
+	private final static String BASE_URL = "https://api.beta.salemove.com/";
 
 	private static final String OPERATOR_SLOT = "Operator";
 
@@ -123,6 +131,15 @@ public class HelloWorldSpeechlet implements Speechlet {
         ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
     }
 
+	public List<Operator> getSaleMoveOperators() {
+		String url = BASE_URL + "/operators?page=1";
+
+		HttpEntity<?> entity = new HttpEntity(getHeaders());
+
+		ResponseEntity<OperatorListResponse> response = new RestTemplate().exchange(url, HttpMethod.GET, entity, OperatorListResponse.class);
+		return response.getBody().getOperators();
+	}
+
     private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
@@ -188,9 +205,9 @@ public class HelloWorldSpeechlet implements Speechlet {
 	}
 
 	public SpeechletResponse getOperatorsEngagement() {
-		doRequestToSaleMove();
+		List<Operator> operators = getSaleMoveOperators();
 
-		String speechText = "Connecting you with salemove";
+		String speechText = "Operators are: " + operators.stream().map(o -> o.getName()).collect(Collectors.joining(","));
 
 		// Create the Simple card content.
 		SimpleCard card = new SimpleCard();
