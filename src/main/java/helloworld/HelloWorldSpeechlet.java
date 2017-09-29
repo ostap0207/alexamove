@@ -70,6 +70,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 		if ("StartEngagementIntent".equals(intentName)) {
 			return startSimpleEngagement(intent);
+		} else if ("HelloWorldIntent".equals(intentName)) {
+			return helloWorldEngagement();
 		} else if ("GetOperatorsIntent".equals(intentName)) {
 			return getOperatorsEngagement();
 		} else if ("AMAZON.HelpIntent".equals(intentName)) {
@@ -77,6 +79,21 @@ public class HelloWorldSpeechlet implements Speechlet {
 		} else {
 			throw new SpeechletException("Invalid Intent");
 		}
+	}
+
+	private SpeechletResponse helloWorldEngagement() {
+		String speechText = "Hello world";
+
+		// Create the Simple card content.
+		SimpleCard card = new SimpleCard();
+		card.setTitle("HelloWorld");
+		card.setContent(speechText);
+
+		// Create the plain text output.
+		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+		speech.setText(speechText);
+
+		return SpeechletResponse.newTellResponse(speech, card);
 	}
 
 	@Override
@@ -110,26 +127,26 @@ public class HelloWorldSpeechlet implements Speechlet {
 		return SpeechletResponse.newAskResponse(speech, reprompt, card);
 	}
 
-    public void doRequestToSaleMove() {
-        String url = "https://api.beta.salemove.com/engagement_requests";
+	public void doRequestToSaleMove() {
+		String url = "https://api.beta.salemove.com/engagement_requests";
 
-        Visitor visitor = new Visitor();
-        visitor.setName("Ostap");
-        visitor.setSiteId("ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c");
+		Visitor visitor = new Visitor();
+		visitor.setName("Ostap");
+		visitor.setSiteId("ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c");
 
-        MediaOptions options = new MediaOptions();
-        options.setPhoneNumber("+37258578461");
+		MediaOptions options = new MediaOptions();
+		options.setPhoneNumber("+37258578461");
 
-        SaleMoveRequest request = new SaleMoveRequest();
-        request.setOperatorId("739e44a5-a0b6-453b-98d1-e962c3784dfc");
-        request.setNewSiteVisitor(visitor);
-        request.setMedia("phone");
-        request.setMediaOptions(options);
+		SaleMoveRequest request = new SaleMoveRequest();
+		request.setOperatorId("739e44a5-a0b6-453b-98d1-e962c3784dfc");
+		request.setNewSiteVisitor(visitor);
+		request.setMedia("phone");
+		request.setMediaOptions(options);
 
-        HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
+		HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
 
-        ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
-    }
+		ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
+	}
 
 	public List<Operator> getSaleMoveOperators() {
 		String url = BASE_URL + "/operators?page=1";
@@ -140,21 +157,21 @@ public class HelloWorldSpeechlet implements Speechlet {
 		return response.getBody().getOperators();
 	}
 
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
-        headers.set("Accept", "application/vnd.salemove.v1+json");
-        headers.set("Content-Type", "application/json");
-        return headers;
-    }
+	private HttpHeaders getHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
+		headers.set("Accept", "application/vnd.salemove.v1+json");
+		headers.set("Content-Type", "application/json");
+		return headers;
+	}
 
-    /**
-     * Creates a {@code SpeechletResponse} for the hello intent.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
+	/**
+	 * Creates a {@code SpeechletResponse} for the hello intent.
+	 *
 	 * @param intent
-     */
-    private SpeechletResponse startSimpleEngagement(Intent intent) {
+	 * @return SpeechletResponse spoken and visual response for the given intent
+	 */
+	private SpeechletResponse startSimpleEngagement(Intent intent) {
 		Map<String, Slot> slots = intent.getSlots();
 
 		Slot operatorSlot = slots.get(OPERATOR_SLOT);
@@ -164,7 +181,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 		}
 
-        doRequestToSaleMove();
+		doRequestToSaleMove();
 
 		String speechText = "Connecting you with salemove";
 
@@ -208,9 +225,9 @@ public class HelloWorldSpeechlet implements Speechlet {
 		List<Operator> operators = getSaleMoveOperators();
 
 		String operatorsString = operators.stream()
-		    .filter(o -> o.getAvailable())
-		    .map(o -> o.getFirstName())
-		    .collect(Collectors.joining(","));
+				.filter(o -> o.getAvailable())
+				.map(o -> o.getFirstName())
+				.collect(Collectors.joining(","));
 		String speechText = "Operators are: " + operatorsString;
 
 		// Create the Simple card content.
