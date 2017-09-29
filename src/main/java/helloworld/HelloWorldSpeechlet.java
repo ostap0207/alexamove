@@ -10,6 +10,7 @@
 package helloworld;
 
 import com.amazon.speech.slu.Intent;
+import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
@@ -24,11 +25,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
  */
 public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
+
+	private static final String OPERATOR_SLOT = "Operator";
 
 	@Override
 	public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -56,7 +61,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 		String intentName = (intent != null) ? intent.getName() : null;
 
 		if ("StartEngagementIntent".equals(intentName)) {
-			return startSimpleEngagement();
+			return startSimpleEngagement(intent);
 		} else if ("GetOperatorsIntent".equals(intentName)) {
 			return getOperatorsEngagement();
 		} else if ("AMAZON.HelpIntent".equals(intentName)) {
@@ -71,7 +76,6 @@ public class HelloWorldSpeechlet implements Speechlet {
 			throws SpeechletException {
 		log.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(),
 				session.getSessionId());
-		// any cleanup logic goes here
 	}
 
 	/**
@@ -127,33 +131,22 @@ public class HelloWorldSpeechlet implements Speechlet {
         return headers;
     }
 
-
-    /*
-
-    curl --request POST \
-    --header 'Authorization: Token gUYitdQwpRSwCb6oEwmlgQ' \
-    --header 'Accept: application/vnd.salemove.v1+json' \
-    --header 'Content-Type: application/json' \
-    --data-binary '{https://api.beta.salemove.com/engagement_requests
-      "operator_id": "739e44a5-a0b6-453b-98d1-e962c3784dfc",
-      "new_site_visitor": {
-        "site_id": "ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c",
-        "name": "Ostap"
-      },
-      "media": "phone",
-      "media_options": {
-        "phone_number": "+37258578461"
-      }
-    }' \
-  ''
-     */
-
     /**
      * Creates a {@code SpeechletResponse} for the hello intent.
      *
      * @return SpeechletResponse spoken and visual response for the given intent
+	 * @param intent
      */
-    private SpeechletResponse startSimpleEngagement() {
+    private SpeechletResponse startSimpleEngagement(Intent intent) {
+		Map<String, Slot> slots = intent.getSlots();
+
+		Slot operatorSlot = slots.get(OPERATOR_SLOT);
+
+		if (operatorSlot != null) {
+			String operator = operatorSlot.getValue();
+
+		}
+
         doRequestToSaleMove();
 
 		String speechText = "Connecting you with salemove";
