@@ -4,7 +4,65 @@
       "intent": "HelloWorldIntent"
     },
     {
-      "intent": "AMAZON.HelpIntent"
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "StartEngagement",
+      "samples": [
+        "call operator",
+        "start engagement with operator",
+        "start engagement with {OperatorName}"
+      ],
+      "slots": [
+        {
+          "name": "OperatorName",
+          "type": "AMAZON.US_FIRST_NAME",
+          "samples": []
+        }
+      ]
     }
-  ]
+  ],
+  "prompts": [
+    {
+      "id": "Elicit.Intent-StartEngagement.IntentSlot-OperatorName",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Please repeat the name"
+        }
+      ]
+    }
+  ],
+  "dialog": {
+    "version": "1.0",
+    "intents": [
+      {
+        "name": "StartEngagement",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "OperatorName",
+            "type": "AMAZON.US_FIRST_NAME",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-StartEngagement.IntentSlot-OperatorName"
+            }
+          }
+        ]
+      }
+    ]
+  }
 }

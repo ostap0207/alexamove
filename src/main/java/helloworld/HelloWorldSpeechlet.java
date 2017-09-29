@@ -9,6 +9,7 @@
  */
 package helloworld;
 
+import com.amazon.speech.slu.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +26,15 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 
+import java.util.Map;
+
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
  */
 public class HelloWorldSpeechlet implements Speechlet {
     private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
+
+    private static final String OPERATOR_NAME_SLOT = "OperatorName";
 
     @Override
     public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -58,11 +63,42 @@ public class HelloWorldSpeechlet implements Speechlet {
 
         if ("HelloWorldIntent".equals(intentName)) {
             return getHelloResponse();
+        } else if ("StartEngagement".equals(intentName)) {
+            return startEngagement(intent);
         } else if ("AMAZON.HelpIntent".equals(intentName)) {
             return getHelpResponse();
         } else {
             throw new SpeechletException("Invalid Intent");
         }
+    }
+
+    private SpeechletResponse startEngagement(Intent intent) {
+        // Get the slots from the intent.
+        Map<String, Slot> slots = intent.getSlots();
+
+        // Get the color slot from the list of slots.
+        Slot favoriteColorSlot = slots.get(OPERATOR_NAME_SLOT);
+        String speechText, repromptText;
+
+        // Check for favorite color and create output to user.
+        if (favoriteColorSlot != null) {
+            // Store the user's favorite color in the Session and create response.
+            String favoriteColor = favoriteColorSlot.getValue();
+            speechText =
+                    String.format("I now know that your favorite color is %s. You can ask me your "
+                            + "favorite color by saying, what's my favorite color?", favoriteColor);
+            repromptText =
+                    "You can ask me your favorite color by saying, what's my favorite color?";
+
+        } else {
+            // Render an error since we don't know what the users favorite color is.
+            speechText = "I'm not sure what your favorite color is, please try again";
+            repromptText =
+                    "I'm not sure what your favorite color is. You can tell me your favorite "
+                            + "color by saying, my favorite color is red";
+        }
+        return null;
+//        return getSpeechletResponse(speechText, repromptText, true);
     }
 
     @Override
