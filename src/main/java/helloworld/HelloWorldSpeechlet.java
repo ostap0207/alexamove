@@ -220,15 +220,20 @@ public class HelloWorldSpeechlet implements Speechlet {
 		    .collect(Collectors.joining(","));
 		String speechText = "Operators are: " + operatorsString;
 
-		// Create the Simple card content.
-		SimpleCard card = new SimpleCard();
-		card.setTitle("HelloWorld");
-		card.setContent(speechText);
+		String repromptText = "Which operator do you want to engage?";
 
-		// Create the plain text output.
-		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-		speech.setText(speechText);
+		return newAskResponse(speechText, repromptText);
+	}
 
-		return SpeechletResponse.newTellResponse(speech, card);
+	private SpeechletResponse newAskResponse(String stringOutput, String repromptText) {
+		PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
+		outputSpeech.setText(stringOutput);
+
+		PlainTextOutputSpeech repromptOutputSpeech = new PlainTextOutputSpeech();
+		repromptOutputSpeech.setText(repromptText);
+		Reprompt reprompt = new Reprompt();
+		reprompt.setOutputSpeech(repromptOutputSpeech);
+
+		return SpeechletResponse.newAskResponse(outputSpeech, reprompt);
 	}
 }
