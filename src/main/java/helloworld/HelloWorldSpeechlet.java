@@ -11,6 +11,10 @@ package helloworld;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -24,6 +28,10 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+
+import model.MediaOptions;
+import model.SaleMoveRequest;
+import model.Visitor;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -96,6 +104,56 @@ public class HelloWorldSpeechlet implements Speechlet {
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
+
+    private void doRequestToSalveMove() {
+        String url = "https://api.beta.salemove.com/engagement_requests";
+
+        Visitor visitor = new Visitor();
+        visitor.setName("Ostap");
+        visitor.setSiteId("ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c");
+
+        MediaOptions options = new MediaOptions();
+        options.setPhoneNumber("+37258578461");
+
+        SaleMoveRequest request = new SaleMoveRequest();
+        request.setOperatorId("739e44a5-a0b6-453b-98d1-e962c3784dfc");
+        request.setNewSiteVisitor(visitor);
+        request.setMedia("phone");
+        request.setMediaOptions(options);
+
+        HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
+
+        ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
+    }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
+        headers.set("Accept", "application/vnd.salemove.v1+json");
+        headers.set("Content-Type", "application/vnd.salemove.v1+json");
+        return headers;
+    }
+
+
+    /*
+
+    curl --request POST \
+    --header 'Authorization: Token gUYitdQwpRSwCb6oEwmlgQ' \
+    --header 'Accept: application/vnd.salemove.v1+json' \
+    --header 'Content-Type: application/json' \
+    --data-binary '{https://api.beta.salemove.com/engagement_requests
+      "operator_id": "739e44a5-a0b6-453b-98d1-e962c3784dfc",
+      "new_site_visitor": {
+        "site_id": "ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c",
+        "name": "Ostap"
+      },
+      "media": "phone",
+      "media_options": {
+        "phone_number": "+37258578461"
+      }
+    }' \
+  ''
+     */
 
     /**
      * Creates a {@code SpeechletResponse} for the hello intent.
