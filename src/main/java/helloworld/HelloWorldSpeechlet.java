@@ -207,7 +207,11 @@ public class HelloWorldSpeechlet implements Speechlet {
 	public SpeechletResponse getOperatorsEngagement() {
 		List<Operator> operators = getSaleMoveOperators();
 
-		String speechText = "Operators are: " + operators.stream().map(o -> o.getName()).collect(Collectors.joining(","));
+		String operatorsString = operators.stream()
+		    .filter(o -> o.getAvailable())
+		    .map(o -> o.getFirstName())
+		    .collect(Collectors.joining(","));
+		String speechText = "Operators are: " + operatorsString;
 
 		// Create the Simple card content.
 		SimpleCard card = new SimpleCard();
