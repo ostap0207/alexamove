@@ -207,7 +207,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 		String operatorsString = operators.stream()
 		    .filter(o -> o.getAvailable())
 		    .map(o -> o.getFirstName())
-		    .collect(Collectors.joining(","));
+		    .collect(Collectors.joining(" and "));
 		String speechText = "Operators are: " + operatorsString;
 
 		String repromptText = "Which operator do you want to engage?";
