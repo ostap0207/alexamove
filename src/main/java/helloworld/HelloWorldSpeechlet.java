@@ -9,6 +9,7 @@
  */
 package helloworld;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +32,9 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 
+import model.Engagement;
 import model.Operator;
+import model.Question;
 import rest.SaleMoveClient;
 
 /**
@@ -42,6 +45,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 	private static final String OPERATOR_SLOT = "Operator";
 	private static final String SURVEY_QUESTIONS = "SURVEY_QUESTIONS";
+	private static final String SURVEY_QUESTION_LIST = "SURVEY_QUESTION_LIST";
+	private static final String SURVEY_QUESTIONS_IDS = "SURVEY_QUESTIONS_IDS";
 
 	@Override
 	public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -222,25 +227,46 @@ public class HelloWorldSpeechlet implements Speechlet {
 	}
 
 	public SpeechletResponse getFeedbackEngagement(Intent intent, Session session) {
-		// TODO: get last engagement ID and fetch survey and move to answers, store questions in sessions
+		Engagement engagement = SaleMoveClient.getLastEngagement();
+		List<Question> questions = SaleMoveClient.getEngagementQuestions(engagement.getId());
 
-//		List<Operator> operators = SaleMoveClient.
+		String questionsIds = questions.stream()
+				.map(q -> q.getId())
+				.collect(Collectors.joining(","));
+		session.setAttribute(SURVEY_QUESTIONS_IDS, questionsIds);
+		questions.forEach(q -> {
+			session.setAttribute(q.getId() + "_" + SURVEY_QUESTIONS, q.getTitle());
+		});
 
-//		String operatorsString = operators.stream()
-//				.filter(o -> o.getAvailable())
-//				.map(o -> o.getFirstName())
-//				.collect(Collectors.joining(","));
-		String speechText = "Operators are: ";
-//
-		String repromptText = "";
-//
-//		session.setAttribute("SURVEY_QUESTIONS", myObject);
-
-		return newAskResponse(speechText, repromptText);
+		return newAskResponse(getNextQuestion(session), "What was your answer again?");
 	}
 
 	public SpeechletResponse getFeedbackAnswerIntent(Intent intent, Session session) {
-		// TODO: ask questions one by one, store count in sessions
-		return null;
+		String question = getNextQuestion(session);
+		if (question != null) {
+			return newAskResponse(question, "What was your answer again?");
+		} else {
+			String speechText = "Thank you for your feedback";
+			SimpleCard card = new SimpleCard();
+			card.setTitle("HelloWorld");
+			card.setContent(speechText);
+
+			PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+			speech.setText(speechText);
+
+			return SpeechletResponse.newTellResponse(speech, card);
+		}
+	}
+
+	// Get the next question and remove the question id from the list
+	public String getNextQuestion(Session session) {
+		String[] ids =  ((String)session.getAttribute(SURVEY_QUESTIONS_IDS)).split(",");
+		if (ids.length > 0) {
+			String[] remainingIds = Arrays.copyOfRange(ids, 1, ids.length);
+			session.setAttribute(SURVEY_QUESTIONS_IDS, Arrays.asList(remainingIds).stream().collect(Collectors.joining(",")));
+			return (String) session.getAttribute(ids[0] + "_" + SURVEY_QUESTIONS);
+		} else {
+			return null;
+		}
 	}
 }
