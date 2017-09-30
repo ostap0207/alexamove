@@ -13,30 +13,119 @@
       "samples": []
     },
     {
-      "name": "StartEngagement",
+      "name": "FeedbackAnswerIntent",
       "samples": [
-        "call operator",
-        "start engagement with operator",
-        "start engagement with {OperatorName}"
+        "say {Answer}"
       ],
       "slots": [
         {
-          "name": "OperatorName",
+          "name": "Answer",
+          "type": "SURVEY_ANSWER",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "FeedbackIntent",
+      "samples": [
+        "feedback",
+        "give feedback",
+        "survey",
+        "fill survey"
+      ],
+      "slots": []
+    },
+    {
+      "name": "GetOperatorsIntent",
+      "samples": [
+        "help to buy a car",
+        "operators",
+        "get operators",
+        "where to buy a car"
+      ],
+      "slots": []
+    },
+    {
+      "name": "StartEngagementIntent",
+      "samples": [
+        "start engagement with {Operator}",
+        "call {Operator}",
+        "engage {Operator}"
+      ],
+      "slots": [
+        {
+          "name": "Operator",
           "type": "AMAZON.US_FIRST_NAME",
           "samples": []
         }
       ]
     }
   ],
+  "types": [
+    {
+      "name": "SURVEY_ANSWER",
+      "values": [
+        {
+          "id": null,
+          "name": {
+            "value": "yes",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "no",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "one",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "two",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "three",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "four",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "five",
+            "synonyms": []
+          }
+        }
+      ]
+    }
+  ],
   "prompts": [
     {
-      "id": "Elicit.Intent-StartEngagement.IntentSlot-OperatorName",
+      "id": "Elicit.Intent-StartEngagementIntent.IntentSlot-Operator",
       "promptVersion": "1.0",
       "definitionVersion": "1.0",
       "variations": [
         {
           "type": "PlainText",
-          "value": "Please repeat the name"
+          "value": "Please report the operator name"
         }
       ]
     }
@@ -45,17 +134,17 @@
     "version": "1.0",
     "intents": [
       {
-        "name": "StartEngagement",
+        "name": "StartEngagementIntent",
         "confirmationRequired": false,
         "prompts": {},
         "slots": [
           {
-            "name": "OperatorName",
+            "name": "Operator",
             "type": "AMAZON.US_FIRST_NAME",
             "elicitationRequired": true,
             "confirmationRequired": false,
             "prompts": {
-              "elicit": "Elicit.Intent-StartEngagement.IntentSlot-OperatorName"
+              "elicit": "Elicit.Intent-StartEngagementIntent.IntentSlot-Operator"
             }
           }
         ]
