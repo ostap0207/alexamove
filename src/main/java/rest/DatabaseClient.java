@@ -2,6 +2,7 @@ package rest;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +25,7 @@ public class DatabaseClient {
         String dbUrl = "https://alexamove-c2f5.restdb.io/rest/visitors";
         HttpEntity<VisitorAuthentication> dbEntity = new HttpEntity(getDbHeaders());
 
-        ResponseEntity<VisitorAuthentication[]> resp = new RestTemplate().postForEntity(dbUrl, dbEntity, VisitorAuthentication[].class);
+        ResponseEntity<VisitorAuthentication[]> resp = new RestTemplate().exchange(dbUrl, HttpMethod.GET, dbEntity, VisitorAuthentication[].class);
         VisitorAuthentication[] body = resp.getBody();
         return body[body.length-1];
     }
