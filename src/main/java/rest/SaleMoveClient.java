@@ -28,6 +28,7 @@ public class SaleMoveClient {
 
     private final static String BASE_URL = "https://api.beta.salemove.com/";
     private final static String SMS_HOOK = "SMS_HOOK";
+    private final static String SALEMOVE_DEV_TOKEN = "SALEMOVE_DEV_TOKEN";
 
     public static List<Operator> getOperators() {
         String url = BASE_URL + "/operators?page=1";
@@ -95,7 +96,7 @@ public class SaleMoveClient {
 
     private static HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
+        headers.set("Authorization", "Token " + System.getenv(SALEMOVE_DEV_TOKEN));
         headers.set("Accept", "application/vnd.salemove.v1+json");
         headers.set("Content-Type", "application/json");
         return headers;
