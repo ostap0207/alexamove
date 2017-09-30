@@ -10,37 +10,35 @@
 package helloworld;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
-import com.amazon.speech.speechlet.*;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.LaunchRequest;
+import com.amazon.speech.speechlet.Session;
+import com.amazon.speech.speechlet.SessionEndedRequest;
+import com.amazon.speech.speechlet.SessionStartedRequest;
+import com.amazon.speech.speechlet.Speechlet;
+import com.amazon.speech.speechlet.SpeechletException;
+import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import model.MediaOptions;
-import model.Operator;
-import model.OperatorListResponse;
-import model.SaleMoveRequest;
-import model.Visitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
+import model.Operator;
+import rest.SaleMoveClient;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
  */
 public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
-
-	private final static String BASE_URL = "https://api.beta.salemove.com/";
 
 	private static final String OPERATOR_SLOT = "Operator";
 
@@ -113,43 +111,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 		return SpeechletResponse.newAskResponse(speech, reprompt, card);
 	}
 
-    public void doRequestToSaleMove(String operatorId) {
-        String url = BASE_URL + "/engagement_requests";
 
-        Visitor visitor = new Visitor();
-        visitor.setName("Ostap");
-        visitor.setSiteId("ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c");
 
-        MediaOptions options = new MediaOptions();
-        options.setPhoneNumber("+37258578461");
-
-        SaleMoveRequest request = new SaleMoveRequest();
-        request.setOperatorId(operatorId);
-        request.setNewSiteVisitor(visitor);
-        request.setMedia("phone");
-        request.setMediaOptions(options);
-
-        HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
-
-        ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
-    }
-
-	public List<Operator> getSaleMoveOperators() {
-		String url = BASE_URL + "/operators?page=1";
-
-		HttpEntity<?> entity = new HttpEntity(getHeaders());
-
-		ResponseEntity<OperatorListResponse> response = new RestTemplate().exchange(url, HttpMethod.GET, entity, OperatorListResponse.class);
-		return response.getBody().getOperators();
-	}
-
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
-        headers.set("Accept", "application/vnd.salemove.v1+json");
-        headers.set("Content-Type", "application/json");
-        return headers;
-    }
 
     /**
      * Creates a {@code SpeechletResponse} for the hello intent.
@@ -167,11 +130,11 @@ public class HelloWorldSpeechlet implements Speechlet {
 			String operatorName = operatorSlot.getValue();
 			speechText = "Connecting you with " + operatorName;
 
-			List<Operator> operators = getSaleMoveOperators();
+			List<Operator> operators = SaleMoveClient.getOperators();
 			Optional<Operator> operator = operators.stream().filter(o -> operatorName.equalsIgnoreCase(o.getFirstName())).findFirst();
 
 			if(operator.isPresent()) {
-				doRequestToSaleMove(operator.get().getId());
+				SaleMoveClient.startEngagementWithOperator(operator.get().getId());
 			} else {
 				speechText = "Operator was not found: " + operatorName;
 			}
@@ -229,7 +192,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 	}
 
 	public SpeechletResponse getOperatorsEngagement() {
-		List<Operator> operators = getSaleMoveOperators();
+		List<Operator> operators = SaleMoveClient.getOperators();
 
 		String operatorsString = operators.stream()
 		    .filter(o -> o.getAvailable())
