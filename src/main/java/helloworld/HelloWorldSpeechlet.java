@@ -9,6 +9,7 @@
  */
 package helloworld;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -230,14 +231,21 @@ public class HelloWorldSpeechlet implements Speechlet {
 		Engagement engagement = SaleMoveClient.getLastEngagement();
 		List<Question> questions = SaleMoveClient.getEngagementQuestions(engagement.getId());
 
+		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
+		session.setAttribute(SURVEY_QUESTION_LIST, titles);
+
+		/*
 		String questionsIds = questions.stream()
 				.map(q -> q.getId())
 				.collect(Collectors.joining(","));
+		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
+		session.setAttribute(SURVEY_QUESTION_LIST, titles);
+
 		session.setAttribute(SURVEY_QUESTIONS_IDS, questionsIds);
 		questions.forEach(q -> {
 			session.setAttribute(q.getId() + "_" + SURVEY_QUESTIONS, q.getTitle());
 		});
-
+		*/
 		return newAskResponse(getNextQuestion(session), "What was your answer again?");
 	}
 
@@ -260,6 +268,16 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 	// Get the next question and remove the question id from the list
 	public String getNextQuestion(Session session) {
+		List<String> titles = (List<String>)session.getAttribute(SURVEY_QUESTION_LIST);
+
+		if(!titles.isEmpty()) {
+			String title = titles.remove(0);
+			session.setAttribute(SURVEY_QUESTION_LIST, titles);
+			return title;
+		} else {
+			return null;
+		}
+		/*
 		String[] ids =  ((String)session.getAttribute(SURVEY_QUESTIONS_IDS)).split(",");
 		if (ids.length > 0) {
 			String[] remainingIds = Arrays.copyOfRange(ids, 1, ids.length);
@@ -268,5 +286,6 @@ public class HelloWorldSpeechlet implements Speechlet {
 		} else {
 			return null;
 		}
+		*/
 	}
 }
