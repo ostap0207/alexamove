@@ -9,6 +9,7 @@
  */
 package helloworld;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -218,8 +219,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 		Engagement engagement = SaleMoveClient.getLastEngagement();
 		List<Question> questions = SaleMoveClient.getEngagementQuestions(engagement.getId());
 
-		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
-		session.setAttribute(SURVEY_QUESTION_LIST, questions);
+		List<String> list = questions.stream().map(q -> q.getId() + "_" + q.getTitle()).collect(Collectors.toList());
+		session.setAttribute(SURVEY_QUESTION_LIST, list);
 		session.setAttribute(LAST_ENGAGEMENT_ID, engagement.getId());
 
 		return newAskResponse(getNextQuestion(session), "What was your answer again?");
@@ -256,13 +257,15 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 	// Get the next question and remove the question id from the list
 	private String getNextQuestion(Session session) {
-		List<Question> questions = (List<Question>)session.getAttribute(SURVEY_QUESTION_LIST);
+		List<String> questions = (List<String>)session.getAttribute(SURVEY_QUESTION_LIST);
 
 		if(!questions.isEmpty()) {
-			Question question = questions.remove(0);
+			String question = questions.remove(0);
+			String id = question.split("_")[0];
+			String title = question.split("_")[1];
 			session.setAttribute(SURVEY_QUESTION_LIST, questions);
-			session.setAttribute(LAST_QUESTION_ID, question.getId());
-			return question.getTitle();
+			session.setAttribute(LAST_QUESTION_ID, id);
+			return title;
 		} else {
 			return null;
 		}
