@@ -223,7 +223,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 		session.setAttribute(SURVEY_QUESTION_LIST, list);
 		session.setAttribute(LAST_ENGAGEMENT_ID, engagement.getId());
 
-		return newAskResponse(getNextQuestion(session), "What was your answer again?");
+		return newAskResponse(getQuestion(session, true), "What was your answer again?");
 	}
 
 	public SpeechletResponse getFeedbackAnswerIntent(Intent intent, Session session) {
@@ -231,8 +231,10 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 		Slot answerSlot = slots.get(ANSWER_SLOT);
 		String speechText = "";
+		Boolean hasAnswer = answerSlot != null;
 
-		if (answerSlot != null) {
+
+		if (hasAnswer) {
 			String answer = answerSlot.getValue();
 			String lastQuestionId = (String)session.getAttribute(LAST_QUESTION_ID);
 			String lastEngagementId = (String)session.getAttribute(LAST_ENGAGEMENT_ID);
@@ -243,7 +245,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 			log.info("answerslot missing");
 		}
 
-		String question = getNextQuestion(session);
+		String question = getQuestion(session, hasAnswer);
 		if (question != null) {
 			return newAskResponse(question, "What was your answer again?");
 		} else {
@@ -260,11 +262,16 @@ public class HelloWorldSpeechlet implements Speechlet {
 	}
 
 	// Get the next question and remove the question id from the list
-	private String getNextQuestion(Session session) {
+	private String getQuestion(Session session, Boolean next) {
 		List<String> questions = (List<String>)session.getAttribute(SURVEY_QUESTION_LIST);
 
+		String question;
 		if(!questions.isEmpty()) {
-			String question = questions.remove(0);
+			if (next) {
+				question = questions.remove(0);
+			} else {
+				question = questions.iterator().next();
+			}
 			String id = question.split("_")[0];
 			String title = question.split("_")[1];
 			session.setAttribute(SURVEY_QUESTION_LIST, questions);
