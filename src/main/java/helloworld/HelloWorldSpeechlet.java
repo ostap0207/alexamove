@@ -9,8 +9,6 @@
  */
 package helloworld;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,9 +43,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
 
 	private static final String OPERATOR_SLOT = "Operator";
-	private static final String SURVEY_QUESTIONS = "SURVEY_QUESTIONS";
 	private static final String SURVEY_QUESTION_LIST = "SURVEY_QUESTION_LIST";
-	private static final String SURVEY_QUESTIONS_IDS = "SURVEY_QUESTIONS_IDS";
 
 	@Override
 	public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -215,18 +211,6 @@ public class HelloWorldSpeechlet implements Speechlet {
 		return newAskResponse(speechText, repromptText);
 	}
 
-	private SpeechletResponse newAskResponse(String stringOutput, String repromptText) {
-		PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
-		outputSpeech.setText(stringOutput);
-
-		PlainTextOutputSpeech repromptOutputSpeech = new PlainTextOutputSpeech();
-		repromptOutputSpeech.setText(repromptText);
-		Reprompt reprompt = new Reprompt();
-		reprompt.setOutputSpeech(repromptOutputSpeech);
-
-		return SpeechletResponse.newAskResponse(outputSpeech, reprompt);
-	}
-
 	public SpeechletResponse getFeedbackEngagement(Intent intent, Session session) {
 		Engagement engagement = SaleMoveClient.getLastEngagement();
 		List<Question> questions = SaleMoveClient.getEngagementQuestions(engagement.getId());
@@ -234,18 +218,6 @@ public class HelloWorldSpeechlet implements Speechlet {
 		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
 		session.setAttribute(SURVEY_QUESTION_LIST, titles);
 
-		/*
-		String questionsIds = questions.stream()
-				.map(q -> q.getId())
-				.collect(Collectors.joining(","));
-		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
-		session.setAttribute(SURVEY_QUESTION_LIST, titles);
-
-		session.setAttribute(SURVEY_QUESTIONS_IDS, questionsIds);
-		questions.forEach(q -> {
-			session.setAttribute(q.getId() + "_" + SURVEY_QUESTIONS, q.getTitle());
-		});
-		*/
 		return newAskResponse(getNextQuestion(session), "What was your answer again?");
 	}
 
@@ -267,7 +239,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 	}
 
 	// Get the next question and remove the question id from the list
-	public String getNextQuestion(Session session) {
+	private String getNextQuestion(Session session) {
 		List<String> titles = (List<String>)session.getAttribute(SURVEY_QUESTION_LIST);
 
 		if(!titles.isEmpty()) {
@@ -277,15 +249,17 @@ public class HelloWorldSpeechlet implements Speechlet {
 		} else {
 			return null;
 		}
-		/*
-		String[] ids =  ((String)session.getAttribute(SURVEY_QUESTIONS_IDS)).split(",");
-		if (ids.length > 0) {
-			String[] remainingIds = Arrays.copyOfRange(ids, 1, ids.length);
-			session.setAttribute(SURVEY_QUESTIONS_IDS, Arrays.asList(remainingIds).stream().collect(Collectors.joining(",")));
-			return (String) session.getAttribute(ids[0] + "_" + SURVEY_QUESTIONS);
-		} else {
-			return null;
-		}
-		*/
+	}
+
+	private SpeechletResponse newAskResponse(String stringOutput, String repromptText) {
+		PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
+		outputSpeech.setText(stringOutput);
+
+		PlainTextOutputSpeech repromptOutputSpeech = new PlainTextOutputSpeech();
+		repromptOutputSpeech.setText(repromptText);
+		Reprompt reprompt = new Reprompt();
+		reprompt.setOutputSpeech(repromptOutputSpeech);
+
+		return SpeechletResponse.newAskResponse(outputSpeech, reprompt);
 	}
 }
