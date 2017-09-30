@@ -49,7 +49,6 @@ public class HelloWorldSpeechlet implements Speechlet {
 			throws SpeechletException {
 		log.info("onSessionStarted requestId={}, sessionId={}", request.getRequestId(),
 				session.getSessionId());
-		// any initialization logic goes here
 	}
 
 	@Override
@@ -71,6 +70,10 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 		if ("StartEngagementIntent".equals(intentName)) {
 			return startSimpleEngagement(intent);
+		} else if ("FeedbackIntent".equals(intentName)) {
+			return getFeedbackEngagement(intent, session);
+		} else if ("FeedbackAnswerIntent".equals(intentName)) {
+			return getFeedbackAnswerIntent(intent, session);
 		} else if ("GetOperatorsIntent".equals(intentName)) {
 			return getOperatorsEngagement();
 		} else if ("AMAZON.HelpIntent".equals(intentName)) {
@@ -252,5 +255,28 @@ public class HelloWorldSpeechlet implements Speechlet {
 		reprompt.setOutputSpeech(repromptOutputSpeech);
 
 		return SpeechletResponse.newAskResponse(outputSpeech, reprompt);
+	}
+
+	public SpeechletResponse getFeedbackEngagement(Intent intent, Session session) {
+		// TODO: get last engagement ID and fetch survey and move to answers, store questions in sessions
+
+		List<Operator> operators = getSaleMoveOperators();
+
+		String operatorsString = operators.stream()
+				.filter(o -> o.getAvailable())
+				.map(o -> o.getFirstName())
+				.collect(Collectors.joining(","));
+		String speechText = "Operators are: " + operatorsString;
+
+		String repromptText = "my first questions";
+
+//		session.setAttribute(COLOR_KEY, favoriteColor);
+
+		return newAskResponse(speechText, repromptText);
+	}
+
+	public SpeechletResponse getFeedbackAnswerIntent(Intent intent, Session session) {
+		// TODO: ask questions one by one, store count in sessions
+		return null;
 	}
 }
