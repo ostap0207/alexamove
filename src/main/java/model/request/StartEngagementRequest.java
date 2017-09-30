@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import model.MediaOptions;
 import model.Visitor;
+import model.Webhook;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by margus on 29.09.17.
@@ -24,4 +28,7 @@ public class StartEngagementRequest {
 
     @JsonProperty("media_options")
     private MediaOptions mediaOptions;
+
+    @JsonProperty("webhooks")
+    private List<Webhook> webhooks = new ArrayList<>();
 }

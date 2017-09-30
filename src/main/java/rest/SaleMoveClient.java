@@ -1,22 +1,19 @@
 package rest;
 
+import java.util.Arrays;
 import java.util.List;
 
+import model.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import model.Engagement;
-import model.Question;
 import model.response.EngagementListResponse;
 import model.response.EngagementRequestResponse;
-import model.MediaOptions;
-import model.Operator;
 import model.response.OperatorListResponse;
 import model.request.StartEngagementRequest;
-import model.Visitor;
 import model.response.QuestionListResponse;
 
 /**
@@ -25,6 +22,7 @@ import model.response.QuestionListResponse;
 public class SaleMoveClient {
 
     private final static String BASE_URL = "https://api.beta.salemove.com/";
+    private final static String SMS_HOOK = "SMS_HOOK";
 
     public static List<Operator> getOperators() {
         String url = BASE_URL + "/operators?page=1";
@@ -51,10 +49,11 @@ public class SaleMoveClient {
         request.setMedia("phone");
         request.setMediaOptions(options);
 
+        request.getWebhooks().add(new Webhook(System.getenv(SMS_HOOK), "POST", Arrays.asList("engagement.chat.message")));
+
         HttpEntity<StartEngagementRequest> entity = new HttpEntity(request, getHeaders());
 
         ResponseEntity<EngagementRequestResponse> response = new RestTemplate().postForEntity(url, entity, EngagementRequestResponse.class);
-
 
         DatabaseClient.saveVisitorAuthentication(response.getBody().getVisitorAuthentication());
     }
