@@ -16,6 +16,12 @@
       "samples": []
     },
     {
+      "name": "WarmUpIntent",
+      "samples": [
+        "warm up"
+      ]
+    },
+    {
       "name": "StartEngagement",
       "samples": [
         "call operator",

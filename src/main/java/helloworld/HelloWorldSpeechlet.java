@@ -74,6 +74,8 @@ public class HelloWorldSpeechlet implements Speechlet {
 			return getOperatorsEngagement();
 		} else if ("AMAZON.HelpIntent".equals(intentName)) {
 			return getHelpResponse();
+		} else if ("WarmUpIntent".equals(intentName)) {
+			return warmUp();
 		} else {
 			throw new SpeechletException("Invalid Intent");
 		}
@@ -167,6 +169,21 @@ public class HelloWorldSpeechlet implements Speechlet {
         doRequestToSaleMove();
 
 		String speechText = "Connecting you with salemove";
+
+		// Create the Simple card content.
+		SimpleCard card = new SimpleCard();
+		card.setTitle("HelloWorld");
+		card.setContent(speechText);
+
+		// Create the plain text output.
+		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+		speech.setText(speechText);
+
+		return SpeechletResponse.newTellResponse(speech, card);
+	}
+
+	private SpeechletResponse warmUp() {
+		String speechText = "SaleMove warmed up";
 
 		// Create the Simple card content.
 		SimpleCard card = new SimpleCard();
