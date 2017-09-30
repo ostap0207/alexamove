@@ -8,7 +8,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import model.EngagementResponse;
+import model.Engagement;
+import model.EngagementListResponse;
+import model.EngagementRequestResponse;
 import model.MediaOptions;
 import model.Operator;
 import model.OperatorListResponse;
@@ -49,10 +51,19 @@ public class SaleMoveClient {
 
         HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
 
-        ResponseEntity<EngagementResponse> response = new RestTemplate().postForEntity(url, entity, EngagementResponse.class);
+        ResponseEntity<EngagementRequestResponse> response = new RestTemplate().postForEntity(url, entity, EngagementRequestResponse.class);
 
 
         DatabaseClient.saveVisitorAuthentication(response.getBody().getVisitorAuthentication());
+    }
+
+    private static Engagement getLastEngagement() {
+        String url = "https://api.beta.salemove.com/engagements?operator_ids=739e44a5-a0b6-453b-98d1-e962c3784dfc&site_ids=ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c&order=desc&per_page=1";
+
+        HttpEntity<?> entity = new HttpEntity(getHeaders());
+
+        ResponseEntity<EngagementListResponse> resp = new RestTemplate().exchange(url, HttpMethod.GET, entity, EngagementListResponse.class);
+        return resp.getBody().getEngagements().get(0);
     }
 
     private static HttpHeaders getHeaders() {

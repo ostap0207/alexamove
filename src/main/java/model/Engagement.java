@@ -1,7 +1,6 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,8 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EngagementResponse {
+public class Engagement {
 
-    @JsonProperty("visitor_authentication")
-    private VisitorAuthentication visitorAuthentication;
+    private String id;
 }
