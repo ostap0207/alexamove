@@ -10,7 +10,7 @@ compileJava {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Launcher',
+        attributes 'Main-Class': 'salemove.alexa.Launcher',
                 'Implementation-Title': 'Gradle Quickstart',
                 'Implementation-Version': version
     }
