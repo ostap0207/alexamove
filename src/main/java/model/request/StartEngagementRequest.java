@@ -1,16 +1,18 @@
-package model;
+package model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
+import model.MediaOptions;
+import model.Visitor;
 
 /**
  * Created by margus on 29.09.17.
  */
 @Getter
 @Setter
-public class SaleMoveRequest {
+public class StartEngagementRequest {
 
     @JsonProperty("operator_id")
     private String operatorId;

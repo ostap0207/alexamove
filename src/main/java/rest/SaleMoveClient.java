@@ -9,13 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import model.Engagement;
-import model.EngagementListResponse;
-import model.EngagementRequestResponse;
+import model.Question;
+import model.response.EngagementListResponse;
+import model.response.EngagementRequestResponse;
 import model.MediaOptions;
 import model.Operator;
-import model.OperatorListResponse;
-import model.SaleMoveRequest;
+import model.response.OperatorListResponse;
+import model.request.StartEngagementRequest;
 import model.Visitor;
+import model.response.QuestionListResponse;
 
 /**
  * Created by margus on 30.09.17.
@@ -43,13 +45,13 @@ public class SaleMoveClient {
         MediaOptions options = new MediaOptions();
         options.setPhoneNumber("+37258578461");
 
-        SaleMoveRequest request = new SaleMoveRequest();
+        StartEngagementRequest request = new StartEngagementRequest();
         request.setOperatorId(operatorId);
         request.setNewSiteVisitor(visitor);
         request.setMedia("phone");
         request.setMediaOptions(options);
 
-        HttpEntity<SaleMoveRequest> entity = new HttpEntity(request, getHeaders());
+        HttpEntity<StartEngagementRequest> entity = new HttpEntity(request, getHeaders());
 
         ResponseEntity<EngagementRequestResponse> response = new RestTemplate().postForEntity(url, entity, EngagementRequestResponse.class);
 
@@ -57,13 +59,21 @@ public class SaleMoveClient {
         DatabaseClient.saveVisitorAuthentication(response.getBody().getVisitorAuthentication());
     }
 
-    private static Engagement getLastEngagement() {
-        String url = "https://api.beta.salemove.com/engagements?operator_ids=739e44a5-a0b6-453b-98d1-e962c3784dfc&site_ids=ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c&order=desc&per_page=1";
+    public static Engagement getLastEngagement() {
+        String url = BASE_URL + "/engagements?operator_ids=739e44a5-a0b6-453b-98d1-e962c3784dfc&site_ids=ea0cab17-301c-4c3b-b6eb-6cef6dd93b5c&order=desc&per_page=1";
 
         HttpEntity<?> entity = new HttpEntity(getHeaders());
 
         ResponseEntity<EngagementListResponse> resp = new RestTemplate().exchange(url, HttpMethod.GET, entity, EngagementListResponse.class);
         return resp.getBody().getEngagements().get(0);
+    }
+
+    public static List<Question> getEngagementQuestions(String engagementId) {
+        String url = BASE_URL + "engagements/" + engagementId +"/visitor_survey";
+        HttpEntity<?> entity = new HttpEntity(getHeaders());
+
+        ResponseEntity<QuestionListResponse> resp = new RestTemplate().exchange(url, HttpMethod.GET, entity, QuestionListResponse.class);
+        return resp.getBody().getQuestions();
     }
 
     private static HttpHeaders getHeaders() {
