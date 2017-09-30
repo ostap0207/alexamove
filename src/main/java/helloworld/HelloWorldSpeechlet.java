@@ -41,6 +41,7 @@ public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
 
 	private static final String OPERATOR_SLOT = "Operator";
+	private static final String SURVEY_QUESTIONS = "SURVEY_QUESTIONS";
 
 	@Override
 	public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -223,17 +224,17 @@ public class HelloWorldSpeechlet implements Speechlet {
 	public SpeechletResponse getFeedbackEngagement(Intent intent, Session session) {
 		// TODO: get last engagement ID and fetch survey and move to answers, store questions in sessions
 
-		List<Operator> operators = getSaleMoveOperators();
+//		List<Operator> operators = SaleMoveClient.
 
-		String operatorsString = operators.stream()
-				.filter(o -> o.getAvailable())
-				.map(o -> o.getFirstName())
-				.collect(Collectors.joining(","));
-		String speechText = "Operators are: " + operatorsString;
-
-		String repromptText = "my first questions";
-
-//		session.setAttribute(COLOR_KEY, favoriteColor);
+//		String operatorsString = operators.stream()
+//				.filter(o -> o.getAvailable())
+//				.map(o -> o.getFirstName())
+//				.collect(Collectors.joining(","));
+		String speechText = "Operators are: ";
+//
+		String repromptText = "";
+//
+//		session.setAttribute("SURVEY_QUESTIONS", myObject);
 
 		return newAskResponse(speechText, repromptText);
 	}
