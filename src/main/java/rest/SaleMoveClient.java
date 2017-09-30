@@ -10,6 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import model.Answer;
+import model.Engagement;
+import model.Question;
+import model.VisitorAuthentication;
+import model.request.SurveyAnswerRequest;
 import model.response.EngagementListResponse;
 import model.response.EngagementRequestResponse;
 import model.response.OperatorListResponse;
@@ -75,9 +80,31 @@ public class SaleMoveClient {
         return resp.getBody().getQuestions();
     }
 
+    public static void saveSurveyAnswer(String lastQuestionId, String answer, String lastEngagementId) {
+        String url = BASE_URL + "/engagements/" + lastEngagementId + "/visitor_survey/answers";
+
+        SurveyAnswerRequest request = new SurveyAnswerRequest();
+        request.setAnswers(Arrays.asList(new Answer(lastQuestionId, answer)));
+
+        VisitorAuthentication authentication = DatabaseClient.getVisitorAuthentication();
+
+        HttpEntity<SurveyAnswerRequest> entity = new HttpEntity<>(request, getVisitorHeaders(authentication));
+
+        ResponseEntity<String> resp = new RestTemplate().exchange(url, HttpMethod.PUT, entity, String.class);
+    }
+
     private static HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Token gUYitdQwpRSwCb6oEwmlgQ");
+        headers.set("Accept", "application/vnd.salemove.v1+json");
+        headers.set("Content-Type", "application/json");
+        return headers;
+    }
+
+    private static HttpHeaders getVisitorHeaders(VisitorAuthentication authentication) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authentication.getAuthorization());
+        headers.set("X-Salemove-Visit-Session-Id", authentication.getSaleMoveVisitSessionId());
         headers.set("Accept", "application/vnd.salemove.v1+json");
         headers.set("Content-Type", "application/json");
         return headers;

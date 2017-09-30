@@ -43,7 +43,10 @@ public class HelloWorldSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HelloWorldSpeechlet.class);
 
 	private static final String OPERATOR_SLOT = "Operator";
+	private static final String ANSWER_SLOT = "Answer";
 	private static final String SURVEY_QUESTION_LIST = "SURVEY_QUESTION_LIST";
+	private static final String LAST_QUESTION_ID = "LAST_QUESTION_ID";
+	private static final String LAST_ENGAGEMENT_ID = "LAST_ENGAGEMENT_ID";
 
 	@Override
 	public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -216,17 +219,30 @@ public class HelloWorldSpeechlet implements Speechlet {
 		List<Question> questions = SaleMoveClient.getEngagementQuestions(engagement.getId());
 
 		List<String> titles = questions.stream().map(q -> q.getTitle()).collect(Collectors.toList());
-		session.setAttribute(SURVEY_QUESTION_LIST, titles);
+		session.setAttribute(SURVEY_QUESTION_LIST, questions);
+		session.setAttribute(LAST_ENGAGEMENT_ID, engagement.getId());
 
 		return newAskResponse(getNextQuestion(session), "What was your answer again?");
 	}
 
 	public SpeechletResponse getFeedbackAnswerIntent(Intent intent, Session session) {
+		Map<String, Slot> slots = intent.getSlots();
+
+		Slot answerSlot = slots.get(ANSWER_SLOT);
+		String speechText = "";
+
+		if (answerSlot != null) {
+			String answer = answerSlot.getValue();
+			String lastQuestionId = (String)session.getAttribute(LAST_QUESTION_ID);
+			String lastEngagementId = (String)session.getAttribute(LAST_ENGAGEMENT_ID);
+			SaleMoveClient.saveSurveyAnswer(lastQuestionId, answer, lastEngagementId);
+		}
+
 		String question = getNextQuestion(session);
 		if (question != null) {
 			return newAskResponse(question, "What was your answer again?");
 		} else {
-			String speechText = "Thank you for your feedback";
+			speechText = "Thank you for your feedback";
 			SimpleCard card = new SimpleCard();
 			card.setTitle("HelloWorld");
 			card.setContent(speechText);
@@ -240,12 +256,13 @@ public class HelloWorldSpeechlet implements Speechlet {
 
 	// Get the next question and remove the question id from the list
 	private String getNextQuestion(Session session) {
-		List<String> titles = (List<String>)session.getAttribute(SURVEY_QUESTION_LIST);
+		List<Question> questions = (List<Question>)session.getAttribute(SURVEY_QUESTION_LIST);
 
-		if(!titles.isEmpty()) {
-			String title = titles.remove(0);
-			session.setAttribute(SURVEY_QUESTION_LIST, titles);
-			return title;
+		if(!questions.isEmpty()) {
+			Question question = questions.remove(0);
+			session.setAttribute(SURVEY_QUESTION_LIST, questions);
+			session.setAttribute(LAST_QUESTION_ID, question.getId());
+			return question.getTitle();
 		} else {
 			return null;
 		}

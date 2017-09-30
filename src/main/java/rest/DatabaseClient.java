@@ -20,6 +20,15 @@ public class DatabaseClient {
         ResponseEntity<String> resp = new RestTemplate().postForEntity(dbUrl, dbEntity, String.class);
     }
 
+    public static VisitorAuthentication getVisitorAuthentication() {
+        String dbUrl = "https://alexamove-c2f5.restdb.io/rest/visitors";
+        HttpEntity<VisitorAuthentication> dbEntity = new HttpEntity(getDbHeaders());
+
+        ResponseEntity<VisitorAuthentication[]> resp = new RestTemplate().postForEntity(dbUrl, dbEntity, VisitorAuthentication[].class);
+        VisitorAuthentication[] body = resp.getBody();
+        return body[body.length-1];
+    }
+
     private static HttpHeaders getDbHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-apikey", "414b89374a1f5817a4cde7f8bd35c7d88ebf4");
