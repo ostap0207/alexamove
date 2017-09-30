@@ -237,6 +237,10 @@ public class HelloWorldSpeechlet implements Speechlet {
 			String lastQuestionId = (String)session.getAttribute(LAST_QUESTION_ID);
 			String lastEngagementId = (String)session.getAttribute(LAST_ENGAGEMENT_ID);
 			SaleMoveClient.saveSurveyAnswer(lastQuestionId, answer, lastEngagementId);
+
+			log.info("answerslot success for answer={}", answer);
+		} else {
+			log.info("answerslot missing");
 		}
 
 		String question = getNextQuestion(session);
